@@ -74,24 +74,18 @@ sudo -u cowrie sed -i 's/^#enabled = false/enabled = true/' "$CFG"
 # ------------------------------------------------------------
 cat <<EOF >/etc/systemd/system/cowrie.service
 [Unit]
-Description=Cowrie SSH and Telnet Honeypot
-After=network.target rsyslog.service
+Description=Cowrie SSH/Telnet Honeypot
+After=network.target
 
 [Service]
-Type=simple
+Type=forking
 User=cowrie
-Group=cowrie
-
 WorkingDirectory=/home/cowrie/cowrie
 Environment="PATH=/home/cowrie/cowrie/cowrie-env/bin:/usr/bin:/bin"
-
-ExecStart=/home/cowrie/cowrie/cowrie-env/bin/python3 \
-/home/cowrie/cowrie/bin/cowrie start
-
-Restart=always
-RestartSec=5
-KillMode=process
-LimitNOFILE=65535
+ExecStart=/home/cowrie/cowrie/cowrie-env/bin/cowrie start
+ExecStop=/home/cowrie/cowrie/cowrie-env/bin/cowrie stop
+PIDFile=/home/cowrie/cowrie/var/run/cowrie.pid
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
